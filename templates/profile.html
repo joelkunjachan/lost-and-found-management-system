@@ -1,0 +1,65 @@
+{% block content %}
+{% load static %}
+{% include 'header.html' %}
+
+<section class="contact-section section-padding" id="section_5">
+    <div class="container">
+        <div class="row justify-content-center">
+
+            <div class="col-lg-6 col-md-8 col-12">
+
+                <div class="card shadow p-4 rounded">
+                    <h3 class="text-center mb-4">My Profile</h3>
+
+                    <div class="text-center mb-3">
+                        <img src="/media/{{ i.student_id }}" 
+                             alt="ID Proof" 
+                             style="width:150px; height:150px; object-fit:cover; border-radius:10px;">
+                    </div>
+
+                    <table class="table table-bordered">
+                        <tr>
+                            <th>Name</th>
+                            <td>{{ i.name }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Email</th>
+                            <td>{{ i.email }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Phone</th>
+                            <td>{{ i.phone }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>Password</th>
+                            <td>{{ i.password }}</td>
+                        </tr>
+
+                        <tr>
+                            <th>ID Proof</th>
+                            <td>
+                                <a href="/media/{{ i.student_id }}" target="_blank">View File</a>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="text-center mt-3">
+                        <a href="update_myprofile/{{i.id}}" class="btn btn-primary px-4">
+
+                            Update Profile
+                        </a>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</section>
+
+{% include 'footer.html' %}
+{% endblock %}

@@ -1,0 +1,103 @@
+{% block content %}
+{% load static %}
+
+{% include 'header.html' %}
+           <section class="contact-section section-padding" id="section_5">
+                <div class="container">
+                    <div class="row">
+
+                        <div class="col-lg-5 col-12 mx-auto">
+                            <form class="custom-form ebook-download-form bg-white shadow" action="addlostt" method="POST" role="form" enctype="multipart/form-data">
+                              {% csrf_token %}
+                                <div class="text-center mb-5">
+                                    <h2 class="mb-1">Add Lost Item Here</h2>
+                                </div>
+
+                                <div class="ebook-download-form-body">
+                                    <div class="input-group mb-4">
+                                        <input type="text" name="itemname" id="ebook-form-name" class="form-control" aria-label="ebook-form-name" aria-describedby="basic-addon1" placeholder="Your itemname" required>
+
+                                        <span class="input-group-text" id="basic-addon1">
+                                            <i class="custom-form-icon bi-person"></i>
+                                        </span>
+                                    </div>
+
+                                    <div class="input-group mb-4">
+                                        <input type="text" name="title" id="ebook-form-name" class="form-control" aria-label="ebook-form-name" aria-describedby="basic-addon1" placeholder="Your title" required>
+
+                                        <span class="input-group-text" id="basic-addon2">
+                                            <i class="custom-form-icon bi-envelope"></i>
+                                        </span>
+                                    </div>
+
+                                     <div class="input-group mb-4">
+                                        <input type="text" name="description" id="ebook-form-name" class="form-control" aria-label="ebook-form-name" aria-describedby="basic-addon1" placeholder="Your description" required>
+
+                                        <span class="input-group-text" id="basic-addon2">
+                                            <i class="custom-form-icon bi-envelope"></i>
+                                        </span>
+                                    </div>
+                                     <div class="input-group mb-4">
+                                        <input type="text" name="item_type" id="ebook-form-name" class="form-control" aria-label="ebook-form-name" aria-describedby="basic-addon1" placeholder="Your item_type" required>
+
+                                        <span class="input-group-text" id="basic-addon2">
+                                            <i class="custom-form-icon bi-envelope"></i>
+                                        </span>
+                                    </div>
+                                     <div class="input-group mb-4">
+<select name="category_id" id="" class="form-control">
+
+    {% for i in result %}
+    <option value="{{i.id}}">{{i.category_name}}</option>
+
+    {% endfor %}
+</select>                                        <p class="help-block text-danger"></p>
+            
+                                        <span class="input-group-text" id="basic-addon2">
+                                            <i class="custom-form-icon bi-envelope"></i>
+                                        </span>
+                                    </div>
+
+                                     <div class="input-group mb-4">
+                                        <input type="text" name="location" id="ebook-form-name" class="form-control" aria-label="ebook-form-name" aria-describedby="basic-addon1" placeholder="Your location" required>
+
+                                        <span class="input-group-text" id="basic-addon2">
+                                            <i class="custom-form-icon bi-envelope"></i>
+                                        </span>
+                                    </div>
+                                     <div class="input-group mb-4">
+                                        <input type="date" name="date" id="ebook-form-name" class="form-control" aria-label="ebook-form-name" aria-describedby="basic-addon1" placeholder="Your date" required>
+
+                                        <span class="input-group-text" id="basic-addon2">
+                                            <i class="custom-form-icon bi-envelope"></i>
+                                        </span>
+                                    </div>
+                                     <div class="input-group mb-4">
+                                        <input type="file" name="item_image" id="ebook-form-name" class="form-control" aria-label="ebook-form-name" aria-describedby="basic-addon1" placeholder="Your id_proof" required>
+
+                                        <span class="input-group-text" id="basic-addon2">
+                                            <i class="custom-form-icon bi-envelope"></i>
+                                        </span>
+                                    </div>
+                                   
+                                    
+                                  
+
+                                    <div class="col-lg-8 col-md-10 col-8 mx-auto">
+                                        <button type="submit" class="form-control">Add</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+
+                    </div>
+                </div>
+            </section>
+
+
+
+
+    {% include 'footer.html' %}
+
+    {% endblock %}
