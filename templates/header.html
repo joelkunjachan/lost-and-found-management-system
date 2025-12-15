@@ -1,7 +1,6 @@
 {% block content %}
 {% load static %}
 
-
 <!doctype html>
 <html lang="en">
     <head>
@@ -40,7 +39,7 @@ https://templatemo.com/tm-588-ebook-landing
 
             <nav class="navbar navbar-expand-lg">
                 <div class="container">
-                    <a class="navbar-brand" href="index">
+                    <a class="navbar-brand" href="http://127.0.0.1:8000/index">
                         <i class="navbar-brand-icon bi-book me-2"></i>
                         <span>ebook</span>
                     </a>
@@ -61,61 +60,61 @@ https://templatemo.com/tm-588-ebook-landing
                         <ul class="navbar-nav ms-lg-auto me-lg-4">
                              {% if request.session.admin %}
                             <li class="nav-item">
-                                <a class="nav-link " href="index">Home</a>
+                                <a class="nav-link " href="http://127.0.0.1:8000/index">Home</a>
                             </li>
 
                                  <li class="nav-item">
-                                <a class="nav-link " href="viewstudentreq">Viewuser</a>
+                                <a class="nav-link " href="http://127.0.0.1:8000/viewstudentreq">Viewuser</a>
                             </li>
                                  <li class="nav-item">
-                                <a class="nav-link " href="cat">Add Category</a>
+                                <a class="nav-link " href="http://127.0.0.1:8000/cat">Add Category</a>
                             </li>
 
                                  <li class="nav-item">
-                                <a class="nav-link" href="viewreq">View Lost item</a>
+                                <a class="nav-link" href="http://127.0.0.1:8000/viewreq">View Lost item</a>
                             </li>
                                  <li class="nav-item">
-                                <a class="nav-link " href="logout">Logout</a>
+                                <a class="nav-link " href="http://127.0.0.1:8000/logout">Logout</a>
                             </li>
     {% elif request.session.uid %}
        <li class="nav-item">
-                                <a class="nav-link" href="index">Home</a>
+                                <a class="nav-link" href="http://127.0.0.1:8000/index">Home</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link" href="profile">Profile</a>
+                                <a class="nav-link" href="http://127.0.0.1:8000/profile">Profile</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="lostt">Add LostItem</a>
+                                <a class="nav-link" href="http://127.0.0.1:8000/lostt">Add LostItem</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="found">Add FoundItem</a>
+                                <a class="nav-link" href="http://127.0.0.1:8000/found">Add FoundItem</a>
                             </li>
                              </li>
                                 <li class="nav-item">
-                                <a class="nav-link" href="viewreq">View Lost item</a>
+                                <a class="nav-link" href="http://127.0.0.1:8000/viewreq">View Lost item</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="viewfound">View Found item</a>
+                                <a class="nav-link" href="http://127.0.0.1:8000/viewfound">View Found item</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="viewlostmatch">View Matched item</a>
+                                <a class="nav-link" href="http://127.0.0.1:8000/viewlostmatch">View Matched item</a>
                             </li>
                               <li class="nav-item">
-                                <a class="nav-link" href="logout">Logout</a>
+                                <a class="nav-link" href="http://127.0.0.1:8000/logout">Logout</a>
                             </li>
 {% else %}
                             
    <li class="nav-item">
-                                <a class="nav-link" href="index">Home</a>
+                                <a class="nav-link" href="http://127.0.0.1:8000/index">Home</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link" href="login">Login</a>
+                                <a class="nav-link" href="http://127.0.0.1:8000/login">Login</a>
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link" href="reg">Register</a>
+                                <a class="nav-link" href="http://127.0.0.1:8000/reg">Register</a>
                             </li>
 {% endif %}
                         </ul>
