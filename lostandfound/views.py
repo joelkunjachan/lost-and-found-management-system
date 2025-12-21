@@ -195,7 +195,7 @@ def addfound(request):
         )
 
         # Compare with LOST items
-        lost_items = lost_table.objects.exclude(image_features=None)
+        lost_items = lost_table.objects.exclude(image_features=None,status="accepted")
 
         for lost in lost_items:
             lost_features = pickle.loads(lost.image_features)
@@ -271,77 +271,14 @@ def studreqaccept(request,id):
     s.save()
     return redirect(viewstudentreq)
 
-# def viewreq(request):
-#     logger.info("Entered viewreq")
-#     print("Entered viewreq")
-#     # Image-based search
-#     if request.method == "POST" and request.FILES.get("search_image"):
-#         print("Entered image search")
-#         uploaded_image = request.FILES["search_image"]
-
-#         temp_path = "media/temp_search.jpg"
-#         with open(temp_path, "wb+") as f:
-#             for chunk in uploaded_image.chunks():
-#                 f.write(chunk)
-
-#         query_features = extract_features(temp_path)
-
-#         scored_items = []
-#         for item in items:
-#             db_features = pickle.loads(item.image_features)
-#             score = cosine_similarity(
-#                 query_features.reshape(1, -1),
-#                 db_features.reshape(1, -1)
-#             )[0][0]
-
-#             if score > 0.7:  # similarity threshold
-#                 scored_items.append((score, item))
-
-#         print("Scored Items:", scored_items)
-
-#         scored_items.sort(reverse=True, key=lambda x: x[0])
-#         items = [item for _, item in scored_items]
-
-#         return render(request, "view_found_item.html", {
-#             "result": scored_items,
-#             "image_search": True
-#         })
-
-#         return render(request, "view_lost_item.html", {
-#             "result": items
-#         })
-#     else:
-#         query = request.GET.get('q')
-
-#         sel = lost_table.objects.all()
-
-#         if query:
-#             sel = sel.filter(
-#                 Q(itemname__icontains=query) |
-#                 Q(title__icontains=query) |
-#                 Q(description__icontains=query) |
-#                 Q(location__icontains=query) |
-#                 Q(item_type__icontains=query)
-#             )
-
-#         user = registerr.objects.all()
-
-#         for i in sel:
-#             for j in user:
-#                 if str(i.user_id) == str(j.id):
-#                     i.user_id = j.name
-
-#         return render(request, 'view_lost_item.html', {
-#             'result': sel
-#         })
-    
 def viewreq(request):
     # IMAGE-BASED SEARCH
     if request.method == "POST" and request.FILES.get("search_image"):
         print("Entered image search", flush=True)
 
         uploaded_image = request.FILES["search_image"]
-        items = lost_table.objects.exclude(image_features=None)
+        # Only search active lost items (exclude those marked accepted)
+        items = lost_table.objects.exclude(image_features=None).exclude(status='accepted').distinct()
 
         temp_path = "media/temp_search.jpg"
         with open(temp_path, "wb+") as f:
@@ -376,7 +313,8 @@ def viewreq(request):
     # TEXT SEARCH / DEFAULT VIEW
     else:
         query = request.GET.get('q')
-        sel = lost_table.objects.all()
+        # show only active lost items (exclude accepted)
+        sel = lost_table.objects.exclude(status='accepted')
 
         if query:
             sel = sel.filter(
@@ -399,12 +337,15 @@ def viewreq(request):
         })
 
 def viewfound(request):
+    uid = request.session.get('uid')
+
     # IMAGE-BASED SEARCH
     if request.method == "POST" and request.FILES.get("search_image"):
         print("Entered image search", flush=True)
 
         uploaded_image = request.FILES["search_image"]
-        items = found_table.objects.exclude(image_features=None)
+        # Only search active found items (exclude those marked completed or with an accepted match)
+        items = found_table.objects.exclude(image_features=None).exclude(status='accepted').exclude(found_matches__request_status='accepted').distinct()
 
         temp_path = "media/temp_search.jpg"
         with open(temp_path, "wb+") as f:
@@ -439,7 +380,8 @@ def viewfound(request):
     # TEXT SEARCH / DEFAULT VIEW
     else:
         query = request.GET.get('q')
-        sel = found_table.objects.all()
+        # show only active found items (exclude completed or already-accepted matches)
+        sel = found_table.objects.exclude(status='accepted').exclude(found_matches__request_status='accepted').distinct()
 
         if query:
             sel = sel.filter(
@@ -458,30 +400,196 @@ def viewfound(request):
 
         return render(request, "view_found_item.html", {
             "result": sel,
-            "image_search": False
+            "image_search": False,
+            "message": request.GET.get('msg', "")
         })
     
 def view_matches_for_lost(request):
-    matches = item_match.objects.filter().select_related('found_item').order_by('-similarity_score')
+    # Only show matches for lost items owned by the current user
+    uid = request.session.get('uid')
+    if not uid:
+        return redirect(login)
+
+    # Handle user making a request from this view
+    if request.method == 'POST':
+        match_id = request.POST.get('match_id')
+        if match_id:
+            try:
+                match = item_match.objects.select_related('lost_item').get(id=match_id)
+            except item_match.DoesNotExist:
+                return redirect(view_matches_for_lost)
+
+            # Only the owner of the lost item can request
+            if str(match.lost_item.user_id) == str(uid):
+                # Only set to requested if it's not already requested or accepted
+                if match.request_status not in ('requested', 'accepted'):
+                    try:
+                        requester = registerr.objects.get(id=uid)
+                        match.request_status = 'requested'
+                        match.requested_by = requester.name
+                        match.save()
+                    except registerr.DoesNotExist:
+                        match.request_status = 'requested'
+                        match.save()
+        return redirect(view_matches_for_lost)
+
+    matches = item_match.objects.filter(
+        lost_item__user_id=str(uid)
+    ).exclude(request_status='accepted').select_related('found_item', 'lost_item').order_by('-similarity_score')
+
+    # Convert similarity score to percentage for display (template shows a % sign)
+    for m in matches:
+        try:
+            m.similarity_score = round(float(m.similarity_score) * 100, 2)
+        except Exception:
+            pass
 
     return render(request, 'matched_items.html', {
         'matches': matches
     })
 
 
+def request_match(request, found_id):
+    """Show user's lost items to select one for requesting a match or handle the POST that creates/updates the request."""
+    uid = request.session.get('uid')
+    if not uid:
+        return redirect(login)
+
+    try:
+        found_item = found_table.objects.get(id=found_id)
+    except found_table.DoesNotExist:
+        return redirect(viewfound)
+
+    user_lost_items = lost_table.objects.filter(user_id=str(uid))
+
+    # If no lost items for this user, redirect back with message
+    if not user_lost_items.exists():
+        return redirect(f"/viewfound?msg=No+lost+items+found.+Please+add+a+lost+item.")
+
+    if request.method == 'POST':
+        lost_id = request.POST.get('lost_item_id')
+        try:
+            lost_item = lost_table.objects.get(id=lost_id, user_id=str(uid))
+        except lost_table.DoesNotExist:
+            return redirect(viewfound)
+
+        # compute similarity if possible
+        sim = 0.0
+        try:
+            if found_item.image_features and lost_item.image_features:
+                f_feat = pickle.loads(found_item.image_features)
+                l_feat = pickle.loads(lost_item.image_features)
+                sim = cosine_similarity(
+                    f_feat.reshape(1, -1),
+                    l_feat.reshape(1, -1)
+                )[0][0]
+        except Exception:
+            sim = 0.0
+
+        # Create or update match and mark request_status as 'requested'
+        requester_name = None
+        try:
+            requester = registerr.objects.get(id=uid)
+            requester_name = requester.name
+        except registerr.DoesNotExist:
+            pass
+
+        match, created = item_match.objects.get_or_create(
+            lost_item=lost_item,
+            found_item=found_item,
+            defaults={
+                'similarity_score': round(float(sim), 4),
+                'request_status': 'requested',
+                'requested_by': requester_name,
+            }
+        )
+
+        if not created:
+            match.request_status = 'requested'
+            match.requested_by = requester_name or match.requested_by
+            match.similarity_score = round(float(sim), 4)
+            match.save()
+
+        # Redirect to user's matches page
+        return redirect('/viewlostmatch')
+
+    return render(request, 'select_lost_for_match.html', {
+        'found_item': found_item,
+        'lost_items': user_lost_items
+    })
 
 
+def view_received_requests(request):
+    """Show incoming requests for found items uploaded by the current user."""
+    uid = request.session.get('uid')
+    if not uid:
+        return redirect(login)
 
-def reqreject(request,id):
-    s=lost_table.objects.get(id=id)
-    s.status='rejected'
-    s.save()
-    return redirect(viewreq)
+    requests_qs = item_match.objects.filter(
+        found_item__user_id=str(uid),
+        request_status='requested'
+    ).select_related('found_item', 'lost_item')
 
-def reqaccept(request,id):
-    s=lost_table.objects.get(id=id)
-    s.status='accepted'
-    s.save()
-    return redirect(viewreq)
+    # Convert similarity to percentage for display
+    for m in requests_qs:
+        try:
+            m.similarity_score = round(float(m.similarity_score) * 100, 2)
+        except Exception:
+            pass
+
+    return render(request, 'received_requests.html', {
+        'requests': requests_qs
+    })
 
 
+def accept_request(request, match_id):
+    uid = request.session.get('uid')
+    if not uid:
+        return redirect(login)
+
+    try:
+        match = item_match.objects.select_related('found_item', 'lost_item').get(id=match_id)
+    except item_match.DoesNotExist:
+        return redirect(view_received_requests)
+
+    # only owner of the found item can accept
+    if str(match.found_item.user_id) != str(uid):
+        return redirect(view_received_requests)
+
+    match.request_status = 'accepted'
+    match.save()
+
+    # Mark both items as completed
+    try:
+        match.found_item.status = 'accepted'
+        match.found_item.save()
+    except Exception:
+        logger.exception("Failed to update found_item status for match %s", match_id)
+
+    try:
+        match.lost_item.status = 'accepted'
+        match.lost_item.save()
+    except Exception:
+        logger.exception("Failed to update lost_item status for match %s", match_id)
+
+    return redirect(view_received_requests)
+
+
+def reject_request(request, match_id):
+    uid = request.session.get('uid')
+    if not uid:
+        return redirect(login)
+
+    try:
+        match = item_match.objects.select_related('found_item').get(id=match_id)
+    except item_match.DoesNotExist:
+        return redirect(view_received_requests)
+
+    # only owner of the found item can reject
+    if str(match.found_item.user_id) != str(uid):
+        return redirect(view_received_requests)
+
+    match.request_status = 'rejected'
+    match.save()
+
+    return redirect(view_received_requests)

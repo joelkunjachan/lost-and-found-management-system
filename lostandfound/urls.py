@@ -48,9 +48,11 @@ urlpatterns = [
 
     path('viewreq',views.viewreq),
     path('viewfound',views.viewfound),
+    path('request_match/<int:found_id>/', views.request_match, name='request_match'),
+    path('requests', views.view_received_requests, name='view_received_requests'),
+    path('requests/accept/<int:match_id>/', views.accept_request, name='accept_request'),
+    path('requests/reject/<int:match_id>/', views.reject_request, name='reject_request'),
     path('viewlostmatch',views.view_matches_for_lost),
-    path('reqaccept/<int:id>',views.reqaccept),
-    path('reqreject/<int:id>',views.reqreject),
 
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
