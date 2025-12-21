@@ -54,6 +54,18 @@ class item_match(models.Model):
     )
     similarity_score = models.FloatField()
     matched_on = models.DateTimeField(auto_now_add=True)
+    # Request workflow fields
+    request_status = models.CharField(
+        max_length=20,
+        choices=(
+            ('none', 'None'),
+            ('requested', 'Requested'),
+            ('accepted', 'Accepted'),
+            ('rejected', 'Rejected'),
+        ),
+        default='none'
+    )
+    requested_by = models.CharField(max_length=150, null=True, blank=True)
 
     class Meta:
         unique_together = ('lost_item', 'found_item')
