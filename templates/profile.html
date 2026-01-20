@@ -38,12 +38,12 @@
                             <td>{{ i.password }}</td>
                         </tr>
 
-                        <tr>
+                        <!-- <tr>
                             <th>ID Proof</th>
                             <td>
                                 <a href="/media/{{ i.student_id }}" target="_blank">View File</a>
                             </td>
-                        </tr>
+                        </tr> -->
                     </table>
 
                     <div class="text-center mt-3">
@@ -56,6 +56,102 @@
                 </div>
 
             </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="page-section">
+    <div class="container">
+        
+        <div class="text-center mb-4">
+            <h2 class="fw-bold">Lost Requests</h2>
+        </div>
+
+        <div class="row">
+
+            {% for i in lost_items %}
+            <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+
+                <div class="card app-card shadow-sm border-0 h-100">
+
+                    <!-- Image -->
+                    <img src="{{ i.item_image.url }}" 
+                         class="card-img-top rounded-top-4"
+                         style=" object-fit: cover;"
+                         alt="Student ID Proof">
+
+                    <div class="card-body">
+
+                        <h5 class="fw-bold">{{ i.user_id }}</h5>
+                       
+                        <p class="mb-1"><strong>Category:</strong> {{ i.categoryname }}</p>
+                        <p class="mb-1"><strong>Itemname:</strong> {{ i.itemname }}</p>
+                        <p class="mb-1"><strong>Title:</strong> {{ i.title }}</p>
+                        <p class="mb-1"><strong>Description:</strong> {{ i.description }}</p>
+                        <p class="mb-1"><strong>Item_type:</strong> {{ i.item_type }}</p>
+                        <p class="mb-1"><strong>Location:</strong> {{ i.location }}</p>
+                        <p class="mb-1"><strong>Date:</strong> {{ i.date }}</p>
+                        <p class="mb-1"><strong>Status:</strong> {{ i.status }}</p>
+
+                        <div class="mt-3 text-center">
+
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+</section>
+
+<section class="page-section">
+    <div class="container">
+        
+        <div class="text-center mb-4">
+            <h2 class="fw-bold">Found Items</h2>
+        </div>
+
+       
+        <div class="row">
+
+            {% for i in found_items %}
+            <div class="col-lg-4 col-md-6 col-sm-12 mb-4">
+
+                <div class="card app-card shadow-sm border-0 h-100">
+
+                    <!-- Image -->
+                    <img src="{{ i.item_image.url }}" 
+                         class="card-img-top rounded-top-4"
+                         style=" object-fit: cover;"
+                         alt="Student ID Proof">
+
+                    <div class="card-body">
+
+                        <h5 class="fw-bold">{{ i.itemname }}</h5>
+                        
+
+
+                        <p class="mb-1"><strong>Category:</strong> {{ i.categoryname }}</p>
+                        <p class="mb-1"><strong>Username:</strong> {{ i.user_id }}</p>
+                        <p class="mb-1"><strong>Title:</strong> {{ i.title }}</p>
+                        <p class="mb-1"><strong>Description:</strong> {{ i.description }}</p>
+                        <p class="mb-1"><strong>Item_type:</strong> {{ i.item_type }}</p>
+                        <p class="mb-1"><strong>Location:</strong> {{ i.location }}</p>
+                        <p class="mb-1"><strong>Date:</strong> {{ i.date }}</p>
+                        <p class="mb-1"><strong>Status:</strong> {{ i.status }}</p>
+
+                       
+                    </div>
+
+                </div>
+
+            </div>
+            {% endfor %}
 
         </div>
     </div>

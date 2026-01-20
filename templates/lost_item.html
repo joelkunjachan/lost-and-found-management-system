@@ -22,33 +22,12 @@
                                         </span>
                                     </div>
 
+                                    <!-- Category (placed after itemname to match models.py) -->
                                     <div class="input-group mb-4">
-                                        <input type="text" name="title" id="ebook-form-name" class="form-control" aria-label="ebook-form-name" aria-describedby="basic-addon1" placeholder="Your title" required>
-
-                                        <span class="input-group-text" id="basic-addon2">
-                                            <i class="custom-form-icon bi-envelope"></i>
-                                        </span>
-                                    </div>
-
-                                     <div class="input-group mb-4">
-                                        <input type="text" name="description" id="ebook-form-name" class="form-control" aria-label="ebook-form-name" aria-describedby="basic-addon1" placeholder="Your description" required>
-
-                                        <span class="input-group-text" id="basic-addon2">
-                                            <i class="custom-form-icon bi-envelope"></i>
-                                        </span>
-                                    </div>
-                                     <div class="input-group mb-4">
-                                        <input type="text" name="item_type" id="ebook-form-name" class="form-control" aria-label="ebook-form-name" aria-describedby="basic-addon1" placeholder="Your item_type" required>
-
-                                        <span class="input-group-text" id="basic-addon2">
-                                            <i class="custom-form-icon bi-envelope"></i>
-                                        </span>
-                                    </div>
-                                     <div class="input-group mb-4">
-<select name="category_id" id="" class="form-control">
-
+<select name="categoryname" id="" class="form-control">
+    <option value="" disabled selected>Select Category</option>
     {% for i in result %}
-    <option value="{{i.id}}">{{i.category_name}}</option>
+    <option value="{{i.category_name}}">{{i.category_name}}</option>
 
     {% endfor %}
 </select>                                        <p class="help-block text-danger"></p>
@@ -57,6 +36,30 @@
                                             <i class="custom-form-icon bi-envelope"></i>
                                         </span>
                                     </div>
+
+                                    <!-- <div class="input-group mb-4">
+                                        <input type="text" name="title" id="ebook-form-name" class="form-control" aria-label="ebook-form-name" aria-describedby="basic-addon1" placeholder="Your title" required>
+
+                                        <span class="input-group-text" id="basic-addon2">
+                                            <i class="custom-form-icon bi-envelope"></i>
+                                        </span>
+                                    </div> -->
+
+                                     <div class="input-group mb-4">
+                                        <input type="text" name="description" id="ebook-form-name" class="form-control" aria-label="ebook-form-name" aria-describedby="basic-addon1" placeholder="Your description" required>
+
+                                        <span class="input-group-text" id="basic-addon2">
+                                            <i class="custom-form-icon bi-envelope"></i>
+                                        </span>
+                                    </div>
+                                     <!-- <div class="input-group mb-4">
+                                        <input type="text" name="item_type" id="ebook-form-name" class="form-control" aria-label="ebook-form-name" aria-describedby="basic-addon1" placeholder="Your item_type" required>
+
+                                        <span class="input-group-text" id="basic-addon2">
+                                            <i class="custom-form-icon bi-envelope"></i>
+                                        </span>
+                                    </div> -->
+                                    
 
                                      <div class="input-group mb-4">
                                         <input type="text" name="location" id="ebook-form-name" class="form-control" aria-label="ebook-form-name" aria-describedby="basic-addon1" placeholder="Your location" required>
