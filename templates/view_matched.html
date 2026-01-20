@@ -1,0 +1,69 @@
+{% block content %}
+{% load static %}
+{% include 'header.html' %}
+
+<section class="page-section">
+    <div class="container">
+
+<h3 class="fw-bold text-center mb-4">All Matched Items</h3>
+
+<div class="row">
+{% for m in matches %}
+    <div class="col-md-6 mb-4">
+        <div class="card app-card shadow-sm h-100">
+
+            <div class="row g-0">
+                <div class="col-md-6">
+                    <img src="{{ m.found_item.item_image.url }}"
+                         class="img-fluid rounded-start"
+                         style="height:200px;object-fit:cover;">
+                </div>
+                <div class="col-md-6">
+                    <div class="card-body">
+                        <h5>{{ m.found_item.itemname }} ↔ {{ m.lost_item.itemname }}</h5>
+
+                        <span class="badge bg-success">
+                            Similarity: {{ m.similarity_score|floatformat:2 }}%
+                        </span>
+
+                        <p class="mt-2">
+                            <strong>Found Location:</strong> {{ m.found_item.location }}
+                        </p>
+
+                        <p>
+                            <strong>Lost Location:</strong> {{ m.lost_item.location }}
+                        </p>
+
+                        <p>
+                            <strong>Date:</strong> {{ m.matched_on|date:"M d, Y" }}
+                        </p>
+
+                        <p>
+                            <strong>Status:</strong>
+                            {% if m.request_status == 'requested' %}
+                                <span class="badge bg-warning text-dark">Requested by {{ m.requested_by }}</span>
+                            {% elif m.request_status == 'accepted' %}
+                                <span class="badge bg-success">Accepted</span>
+                            {% elif m.request_status == 'rejected' %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% else %}
+                                <span class="badge bg-secondary">None</span>
+                            {% endif %}
+                        </p>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+{% empty %}
+    <p class="text-center text-muted">No matches found.</p>
+{% endfor %}
+</div>
+
+ </div>
+</section>
+
+{% include 'footer.html' %}
+{% endblock %}

@@ -65,11 +65,20 @@ def registration(request):
         phone=request.POST.get('phone')
         password=request.POST.get('password')
         id_proof=request.FILES['student_id']
+        
+        # Validation
+        # if len(password) < 8:
+        #     return render(request,'register.html',{'error':"Password must be at least 8 characters"})
+        # if not phone.isdigit() or len(phone) != 10:
+        #     return render(request,'register.html',{'error':"Phone number must be exactly 10 digits"})
+        
         fs = FileSystemStorage()
         filename = fs.save(id_proof.name,id_proof)
-        reg=registerr(name=name,email=email,password=password,phone=phone,student_id=filename,status="pending")
+        reg=registerr(name=name,email=email,password=password,phone=phone,student_id=filename,status="active")
         reg.save()
-    return render(request,'index.html',{'message':"Registration Successful"})
+        return render(request,'index.html',{'message':"Registration Successful"})
+    else:
+        return render(request,'register.html')
 
 
 
@@ -125,11 +134,9 @@ def found(request):
 def addlostt(request):
     if request.method=="POST":
         itemname=request.POST.get('itemname')
-        title=request.POST.get('title')
         description=request.POST.get('description')
-        item_type=request.POST.get('item_type')
         location=request.POST.get('location')
-        category_id=request.POST.get('category_id')
+        categoryname=request.POST.get('categoryname')
         date=request.POST.get('date')
         id_proof=request.FILES['item_image']
         fs = FileSystemStorage()
@@ -137,7 +144,7 @@ def addlostt(request):
         image_features = pickle.dumps(
             extract_features(fs.path(filename))
         )
-        reg=lost_table(itemname=itemname,title=title,description=description,item_type=item_type,location=location,category_id=category_id,date=date,item_image=filename,status="pending",user_id=request.session['uid'], image_features=image_features)
+        reg=lost_table(itemname=itemname,description=description,location=location,categoryname=categoryname,date=date,item_image=filename,status="pending",user_id=request.session['uid'], image_features=image_features)
         reg.save()
     return render(request,'index.html',{'message':"item Added Successful"})
 
@@ -164,11 +171,9 @@ def addfound(request):
     if request.method == "POST":
 
         itemname = request.POST.get('itemname')
-        title = request.POST.get('title')
         description = request.POST.get('description')
-        item_type = request.POST.get('item_type')
         location = request.POST.get('location')
-        category_id = request.POST.get('category_id')
+        categoryname = request.POST.get('categoryname')
         date = request.POST.get('date')
         id_proof = request.FILES['item_image']
 
@@ -182,11 +187,9 @@ def addfound(request):
 
         found_item = found_table.objects.create(
             itemname=itemname,
-            title=title,
             description=description,
-            item_type=item_type,
             location=location,
-            category_id=category_id,
+            categoryname=categoryname,
             date=date,
             item_image=filename,
             status="pending",
@@ -204,8 +207,9 @@ def addfound(request):
                 found_features.reshape(1, -1),
                 lost_features.reshape(1, -1)
             )[0][0]
+            print("Similarity score with lost item ID", lost.id, ":", score, flush=True)
 
-            if score >= 0.75:
+            if score >= 0.40:
                 item_match.objects.get_or_create(
                     lost_item=lost,
                     found_item=found_item,
@@ -225,7 +229,41 @@ def addfound(request):
 
 def profile(request):
     sel=registerr.objects.get(id=request.session['uid'] )
-    return render(request,'profile.html',{'i':sel})
+    #query = request.GET.get('q')
+    # show only active lost items (exclude accepted)
+    lost_items = lost_table.objects.filter(user_id=request.session['uid'])
+
+    # if query:
+    #     sel = sel.filter(
+    #         Q(itemname__icontains=query) |
+    #         Q(title__icontains=query) |
+    #         Q(description__icontains=query) |
+    #         Q(location__icontains=query) |
+    #         Q(item_type__icontains=query)
+    #     )
+
+    # for i in lost_items:
+    #     for j in sel:
+    #         if str(i.user_id) == str(j.id):
+    #             i.user_id = j.name
+
+    found_items = found_table.objects.filter(user_id=request.session['uid'])
+
+    # if query:
+    #     sel = sel.filter(
+    #         Q(itemname__icontains=query) |
+    #         Q(title__icontains=query) |
+    #         Q(description__icontains=query) |
+    #         Q(location__icontains=query) |
+    #         Q(item_type__icontains=query)
+    #     )
+
+    # for i in found_items:
+    #     for j in sel:
+    #         if str(i.user_id) == str(j.id):
+    #             i.user_id = j.name
+    
+    return render(request,'profile.html',{'i':sel,"lost_items":lost_items,"found_items":found_items})
 
 
 
@@ -272,6 +310,8 @@ def studreqaccept(request,id):
     return redirect(viewstudentreq)
 
 def viewreq(request):
+    uid = request.session.get('uid')
+    is_admin = request.session.get('admin') == 'admin'
     # IMAGE-BASED SEARCH
     if request.method == "POST" and request.FILES.get("search_image"):
         print("Entered image search", flush=True)
@@ -307,7 +347,9 @@ def viewreq(request):
 
         return render(request, "view_lost_item.html", {
             "result": scored_items,
-            "image_search": True
+            "image_search": True,
+            "uid": uid,
+            "is_admin": is_admin
         })
 
     # TEXT SEARCH / DEFAULT VIEW
@@ -319,24 +361,26 @@ def viewreq(request):
         if query:
             sel = sel.filter(
                 Q(itemname__icontains=query) |
-                Q(title__icontains=query) |
                 Q(description__icontains=query) |
-                Q(location__icontains=query) |
-                Q(item_type__icontains=query)
+                Q(location__icontains=query)
             )
 
         user = registerr.objects.all()
         for i in sel:
             for j in user:
                 if str(i.user_id) == str(j.id):
-                    i.user_id = j.name
+                    i.owner_name = j.name
 
         return render(request, "view_lost_item.html", {
             "result": sel,
-            "image_search": False
+            "image_search": False,
+            "uid": uid,
+            "is_admin": is_admin
         })
 
 def viewfound(request):
+    uid = request.session.get('uid')
+    is_admin = request.session.get('admin') == 'admin'
     uid = request.session.get('uid')
 
     # IMAGE-BASED SEARCH
@@ -374,7 +418,9 @@ def viewfound(request):
 
         return render(request, "view_found_item.html", {
             "result": scored_items,
-            "image_search": True
+            "image_search": True,
+            "uid": uid,
+            "is_admin": is_admin
         })
 
     # TEXT SEARCH / DEFAULT VIEW
@@ -386,22 +432,22 @@ def viewfound(request):
         if query:
             sel = sel.filter(
                 Q(itemname__icontains=query) |
-                Q(title__icontains=query) |
                 Q(description__icontains=query) |
-                Q(location__icontains=query) |
-                Q(item_type__icontains=query)
+                Q(location__icontains=query)
             )
 
         user = registerr.objects.all()
         for i in sel:
             for j in user:
                 if str(i.user_id) == str(j.id):
-                    i.user_id = j.name
+                    i.owner_name = j.name
 
         return render(request, "view_found_item.html", {
             "result": sel,
             "image_search": False,
-            "message": request.GET.get('msg', "")
+            "message": request.GET.get('msg', ""),
+            "uid": uid,
+            "is_admin": is_admin
         })
     
 def view_matches_for_lost(request):
@@ -445,6 +491,25 @@ def view_matches_for_lost(request):
             pass
 
     return render(request, 'matched_items.html', {
+        'matches': matches
+    })
+
+
+def viewmatched(request):
+    """Admin view to see all matched items."""
+    if not request.session.get('admin'):
+        return redirect(login)
+
+    matches = item_match.objects.all().select_related('found_item', 'lost_item').order_by('-matched_on')
+
+    # Convert similarity score to percentage for display
+    for m in matches:
+        try:
+            m.similarity_score = round(float(m.similarity_score) * 100, 2)
+        except Exception:
+            pass
+
+    return render(request, 'view_matched.html', {
         'matches': matches
     })
 
@@ -593,3 +658,45 @@ def reject_request(request, match_id):
     match.save()
 
     return redirect(view_received_requests)
+
+
+def delete_lost(request, item_id):
+    uid = request.session.get('uid')
+    is_admin = request.session.get('admin') == 'admin'
+    if not uid and not is_admin:
+        return redirect(login)
+
+    try:
+        item = lost_table.objects.get(id=item_id)
+    except lost_table.DoesNotExist:
+        return redirect(viewreq)
+
+    if not is_admin and str(item.user_id) != str(uid):
+        return redirect(viewreq)
+
+    # Delete associated matches
+    item_match.objects.filter(lost_item=item).delete()
+    item.delete()
+
+    return redirect(viewreq)
+
+
+def delete_found(request, item_id):
+    uid = request.session.get('uid')
+    is_admin = request.session.get('admin') == 'admin'
+    if not uid and not is_admin:
+        return redirect(login)
+
+    try:
+        item = found_table.objects.get(id=item_id)
+    except found_table.DoesNotExist:
+        return redirect(viewfound)
+
+    if not is_admin and str(item.user_id) != str(uid):
+        return redirect(viewfound)
+
+    # Delete associated matches
+    item_match.objects.filter(found_item=item).delete()
+    item.delete()
+
+    return redirect(viewfound)

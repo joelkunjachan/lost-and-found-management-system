@@ -15,10 +15,8 @@ class registerr(models.Model):
 class lost_table(models.Model):
     user_id=models.CharField(max_length=150) 
     itemname=models.CharField(max_length=150)
-    category_id=models.CharField(max_length=150)
-    title=models.CharField(max_length=150)
+    categoryname=models.CharField(max_length=150, db_column='category_id')
     description=models.CharField(max_length=150)
-    item_type=models.CharField(max_length=150)
     location=models.CharField(max_length=150)
     date=models.CharField(max_length=150)
     status=models.CharField(max_length=150)
@@ -28,10 +26,8 @@ class lost_table(models.Model):
 class found_table(models.Model):
     user_id=models.CharField(max_length=150)
     itemname=models.CharField(max_length=150)
-    category_id=models.CharField(max_length=150)
-    title=models.CharField(max_length=150)
+    categoryname=models.CharField(max_length=150, db_column='category_id')
     description=models.CharField(max_length=150)
-    item_type=models.CharField(max_length=150)
     location=models.CharField(max_length=150)
     date=models.CharField(max_length=150)
     status=models.CharField(max_length=150)

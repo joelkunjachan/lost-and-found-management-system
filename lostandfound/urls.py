@@ -24,7 +24,7 @@ from .models import *
 
 urlpatterns = [
     path('',views.first),
-    path('index',views.index),
+    path('index/',views.index),
     path('reg',views.reg),
     path('registration',views.registration),
     path('login/',views.login),
@@ -37,7 +37,7 @@ urlpatterns = [
     path('found',views.found),
     path('addlostt',views.addlostt),
     path('addfound',views.addfound),
-    path('profile',views.profile),
+    path('profile/',views.profile),
     path("update_myprofile/<int:id>/", views.update_myprofile, name="update_myprofile"),
     path("update_profile/<int:id>/", views.update_profile, name="update_profile"),
 
@@ -53,6 +53,9 @@ urlpatterns = [
     path('requests/accept/<int:match_id>/', views.accept_request, name='accept_request'),
     path('requests/reject/<int:match_id>/', views.reject_request, name='reject_request'),
     path('viewlostmatch',views.view_matches_for_lost),
+    path('delete_lost/<int:item_id>/', views.delete_lost, name='delete_lost'),
+    path('delete_found/<int:item_id>/', views.delete_found, name='delete_found'),
+    path('viewmatched', views.viewmatched, name='viewmatched'),
 
 
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

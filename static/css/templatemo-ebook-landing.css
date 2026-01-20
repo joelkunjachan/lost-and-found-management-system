@@ -553,7 +553,7 @@ strong {
   HERO        
 -----------------------------------------*/
 .hero-section {
-  background-image: url('../images/businessman-sitting-by-table-cafe.jpg');
+  background-image: url('../images/campus_1.jpg');
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -575,7 +575,7 @@ strong {
 .hero-section .row {
   position: relative;
   z-index: 22;
-  top: 100px;
+  top: 10px;
 }
 
 .hero-image {
